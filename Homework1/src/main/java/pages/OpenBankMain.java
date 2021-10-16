@@ -8,7 +8,6 @@ import java.util.List;
 
 public class OpenBankMain {
 
-    private List<WebElement> results;
     protected WebDriver chromeDriver;
     protected WebElement currencyExchange;
 
@@ -18,7 +17,6 @@ public class OpenBankMain {
     }
 
     public List<WebElement> getCurrencyExchange(){
-        results = currencyExchange.findElements(By.xpath("//*[@class='main-page-exchange__rate']"));
-        return results;
+        return currencyExchange.findElements(By.xpath("//*[@class='main-page-exchange__rate']"));
     }
 }
