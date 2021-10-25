@@ -4,6 +4,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
+/**
+ * Задание 1.1
+ */
 public class GoogleBeforeSearch {
 
     protected WebDriver chromeDriver;

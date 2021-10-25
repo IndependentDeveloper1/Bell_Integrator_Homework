@@ -7,6 +7,9 @@ import org.openqa.selenium.support.How;
 
 import java.util.List;
 
+/**
+ * Задание 1.1
+ */
 public class GooglePF {
 
     private WebDriver chromeDriver;

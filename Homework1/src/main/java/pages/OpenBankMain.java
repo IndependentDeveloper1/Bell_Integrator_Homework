@@ -6,6 +6,9 @@ import org.openqa.selenium.WebElement;
 
 import java.util.List;
 
+/**
+ * Задание 1.2
+ */
 public class OpenBankMain {
 
     protected WebDriver chromeDriver;

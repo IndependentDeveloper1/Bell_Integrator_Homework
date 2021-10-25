@@ -8,6 +8,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.util.List;
 
+/**
+ * Задание 1.1
+ */
 public class GoogleAfterSearch extends GoogleBeforeSearch {
 
     private List<WebElement> results;

@@ -13,6 +13,9 @@ public class Tests extends BaseTests {
 
     private final static String googleAddr = "https://www.google.com/";
 
+    /**
+     * Задание 1.1
+     */
     @Feature("Проверка результатов поиска")
     @DisplayName("Проверка результатов поиска c помощью Page Object")
     @Test

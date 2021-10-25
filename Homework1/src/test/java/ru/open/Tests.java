@@ -19,6 +19,10 @@ public class Tests extends BaseTests{
 
     private final static String googleAddr = "https://www.google.com/";
 
+    /**
+     * Задание 1.2
+     * @throws ParseException
+     */
     @Feature("Проверка результатов поиска")
     @DisplayName("Поиск сайта банка Открытие, и информации на нём об обмене валют")
     @Test

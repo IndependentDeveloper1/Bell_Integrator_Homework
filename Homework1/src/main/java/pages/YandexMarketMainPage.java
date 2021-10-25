@@ -1,10 +1,7 @@
 package pages;
 
 import org.junit.jupiter.api.Assertions;
-import org.openqa.selenium.By;
-import org.openqa.selenium.ElementClickInterceptedException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -13,11 +10,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class YandexMarketPO {
+public class YandexMarketMainPage {
 
-    // Драйвер
+    /**
+     * Обозначаем драйвер и ожидание
+     */
     protected WebDriver driver;
-    // Ожидание подгрузки элемента
     WebDriverWait wait;
 
     // Селектор названий категорий
@@ -32,25 +30,28 @@ public class YandexMarketPO {
     private String selectorMoreInCategories = "//span[@class='_2qvOO _19m_j _3kgUl _2Wxcq']";
     // Селектор подкатегорий
     private String selectorSubCategories = "//li[@data-tid='97b9932a']";
-    // Селектор цена товара от
-    private String selectorPriceFrom = "//input[@id='glpricefrom']";
-    // Селектор цена товара до
-    private String selectorPriceTo = "//input[@id='glpriceto']";
 
-    // Какая страница должна быть открыта
+
+    /**
+     * Переменная для хранения текущей страницы
+     */
     private String pageName = "";
 
 
-    // Категории
+    /**
+     * Объявляем категории и подкатегории
+     */
     private List<WebElement> categories;
     private List<Map<String, Object>> categoriesMaps = new ArrayList<>();
-    // Подкатегории
     private List<WebElement> subCategories;
     private List<Map<String, Object>> subCategoriesMaps = new ArrayList<>();
 
 
-    // Конструктор
-    public YandexMarketPO(WebDriver driver) {
+    /**
+     * Конструктор
+     * @param driver
+     */
+    public YandexMarketMainPage(WebDriver driver) {
         this.driver = driver;
         wait = new WebDriverWait(driver, 10);
     }
@@ -79,71 +80,43 @@ public class YandexMarketPO {
         return categoriesMaps;
     }
 
-//    // Получеаем мапы из NavigationTree
-//    public List<Map<String, Map<String, Object>>> getNavigationCategoryMaps(){
-//        navigationCategory = driver.findElements(By.xpath(selectorNavigationCategories));
-//        for (WebElement element : navigationCategory){
-//            if (element.findElements(By.xpath("//div[@data-zone-data]")).size() == 2){
-//                // У некоторых списков есть кнопка "Свернуть", поэтому разворачиваем
-//                element.findElement(By.xpath("//div[@data-zone-data][2]")).click();
-//                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-zone-data][2]")));
-//            }
-//            navigationCategoriesMaps.add(Map.of(
-//                    // Название ветки
-//                    element.findElement(By.xpath("//a[@class='egKyN _2jA_3 _2EJs7']")).getText(),
-//                    // Его мапа со всеми элементами
-//                    Map.of(
-//                            // Класс  с элементами
-//                            "WEB_ELEMENT", element.findElement(By.xpath("//div[@class='_3VMnE']")),
-//                            // Ссылка на подкатегорию
-//                            "URL", element.findElement(By.xpath(selectorURL)).getAttribute("href"),
-//                            // Название подкатегории
-//                            "NAME_CATEGORY", element.findElement(By.xpath(selectorURL)).getText())
-//                    )
-//            );
-//        }
-//        return navigationCategoriesMaps;
-//    }
 
 
-    // Поиск среди категорий, в отбразившихся категориях выбирается нужная, затем переход на новою страницу
+
+    /**
+     * Переход к нужной категории
+      * @param categoryName Название категории
+     * @return boolean получилось ли выполнить действие
+     */
     public boolean goCategory(String categoryName){
-        pageName = "Яндекс.Маркет";
-        // На всякий случай переходим на страницу яндекс маркет
-        goPage(pageName);
-        // Получаем мапы с категориями
+        goPage("Яндекс.Маркет");
         categoriesMaps = getCategoriesMaps();
-        // Отбираем элемент с нужной категорией
         WebElement category = (WebElement) categoriesMaps.stream()
                 .filter(x -> x.get("NAME_CATEGORY").toString().contains(categoryName))
                 .findFirst()
                 .get().get("WEB_ELEMENT");
-        // Нажимаем на нужную категорию, откроется новая вкладка
         category.click();
-        // Переход на страницу с выбранной категорией
         Assertions.assertTrue(goPage(categoryName),
                 "Не удалось перейти на страницу с именем " + categoryName);
         return true;
     }
 
-    // Перегрузка метода, с подкатегорией
+    /**
+     * Переход к нужной категории с подкатегорией
+     * @param categoryName Название категории
+     * @param subCategoryName Название подкатегории
+     * @return boolean получилось ли выполнить действие
+     */
     public boolean goCategory(String categoryName, String subCategoryName){
-        pageName = "Яндекс.Маркет";
-        // На всякий случай переходим на страницу яндекс маркет
-        goPage(pageName);
-        // Получаем мапы с категориями
+        goPage("Яндекс.Маркет");
         categoriesMaps = getCategoriesMaps();
-        // Отбираем элемент с нужной категорией
         WebElement category = (WebElement) categoriesMaps.stream()
                 .filter(x -> x.get("NAME_CATEGORY").toString().contains(categoryName))
                 .findFirst()
                 .get().get("WEB_ELEMENT");
-        // Наводим мышку к нужной категории
         Actions action = new Actions(driver);
         action.moveToElement(category).build().perform();
-        // Ждём, пока прогрузится
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(selectorMoreInCategories)));
-        //Разворачиваем все "Ещё"
         List<WebElement> moreElements = driver.findElements(By.xpath(selectorMoreInCategories));
         try{
             moreElements.forEach(WebElement::click);
@@ -151,43 +124,47 @@ public class YandexMarketPO {
         catch (ElementClickInterceptedException e){
             System.out.println("Ошибка! Необходимые элементы перекрыты");
         }
-        // Из списка подкатегорий получаем нужную
         subCategoriesMaps = getSubCategoriesMaps();
         WebElement subCategory = (WebElement) subCategoriesMaps.stream()
                 .filter(x -> x.get("NAME_CATEGORY").toString().contains(subCategoryName))
                 .findFirst()
                 .get().get("WEB_ELEMENT");
-        // Нажимаем на нужную подкатегорию, откроется новая вкладка
         subCategory.click();
-        // Переход на страницу в выбранной подкатегорией с проверкой
         Assertions.assertTrue(goPage(subCategoryName),
                 "Не удалось перейти на страницу с именем " + subCategoryName);
         return true;
     }
 
 
-    // Получение подкатегорий, в зависимости от категории
+    /**
+     * Получаем список категорий
+     * @return лист с webelement категорий
+     */
     public List<WebElement> getSubCategories(){
         subCategories = driver.findElements(By.xpath(selectorSubCategories));
         return subCategories;
     }
 
-    // Получение мапы подкатегорий
+    /**
+     * Получаем преобразованный список категорий
+     * @return лист с мапами: webelement, ссылка внутри элемента и название категории
+     */
     public List<Map<String, Object>> getSubCategoriesMaps(){
         for (WebElement element : getSubCategories()){
             categoriesMaps.add(Map.of(
-                    // Элемент категории
                     "WEB_ELEMENT", element,
-                    // Ссылка
                     "URL", element.findElement(By.xpath(selectorURL)).getAttribute("href"),
-                    // Название
                     "NAME_CATEGORY", element.findElement(By.xpath(selectorURL)).getText()
             ));
         }
         return categoriesMaps;
     }
 
-    // Пробуем перейти на необходимую вкладку в браузере
+    /**
+     * Переклюбчаем драйвер на нужную страницу
+     * @param pageName название страницы, на которую необходимо перейти
+     * @return boolean получилось ли выпонить действие
+     */
     private boolean goPage(String pageName){
         List<String> tabs = new ArrayList<>(driver.getWindowHandles());
         for (String tab : tabs){
@@ -198,17 +175,8 @@ public class YandexMarketPO {
         return false;
     }
 
-    // Пробуем задать цену к товарам
-    public boolean setPrice(String lowPrice, String highPrice, String pageName){
-        Assertions.assertTrue(goPage(pageName), "не удалось перейти на страницу " + pageName);
-        WebElement priceFrom = driver.findElement(By.xpath(selectorPriceFrom));
-        WebElement priceTo = driver.findElement(By.xpath(selectorPriceTo));
-        priceFrom.click();
-        priceFrom.sendKeys(lowPrice);
-        priceTo.click();
-        priceTo.sendKeys(lowPrice);
-        return true;
-    }
+
+
 
 //    // Переход к подкатегории
 //    public boolean goSubCategory(String subCategoryName){
@@ -244,3 +212,29 @@ public class YandexMarketPO {
 //        }
 
 //        wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[@asd]"))); ожидание для дебага
+
+//    // Получеаем мапы из NavigationTree
+//    public List<Map<String, Map<String, Object>>> getNavigationCategoryMaps(){
+//        navigationCategory = driver.findElements(By.xpath(selectorNavigationCategories));
+//        for (WebElement element : navigationCategory){
+//            if (element.findElements(By.xpath("//div[@data-zone-data]")).size() == 2){
+//                // У некоторых списков есть кнопка "Свернуть", поэтому разворачиваем
+//                element.findElement(By.xpath("//div[@data-zone-data][2]")).click();
+//                wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//div[@data-zone-data][2]")));
+//            }
+//            navigationCategoriesMaps.add(Map.of(
+//                    // Название ветки
+//                    element.findElement(By.xpath("//a[@class='egKyN _2jA_3 _2EJs7']")).getText(),
+//                    // Его мапа со всеми элементами
+//                    Map.of(
+//                            // Класс  с элементами
+//                            "WEB_ELEMENT", element.findElement(By.xpath("//div[@class='_3VMnE']")),
+//                            // Ссылка на подкатегорию
+//                            "URL", element.findElement(By.xpath(selectorURL)).getAttribute("href"),
+//                            // Название подкатегории
+//                            "NAME_CATEGORY", element.findElement(By.xpath(selectorURL)).getText())
+//                    )
+//            );
+//        }
+//        return navigationCategoriesMaps;
+//    }
