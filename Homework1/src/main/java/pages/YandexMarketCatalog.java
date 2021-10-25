@@ -171,8 +171,8 @@ public class YandexMarketCatalog {
         }
     }
 
-    public boolean checkAllProducts(List<String> productMakers) throws InterruptedException {
-        List<Map<String, Object>> products = getProducts();
-
-    }
+//    public boolean checkAllProducts(List<String> productMakers) throws InterruptedException {
+//        List<Map<String, Object>> products = getProducts();
+//
+//    }
 }
