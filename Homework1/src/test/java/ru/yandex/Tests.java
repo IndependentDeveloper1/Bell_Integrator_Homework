@@ -17,8 +17,6 @@ import java.util.List;
 
 public class Tests extends BaseTests {
 
-
-
     private final static String yandexAddr = "https://yandex.ru/";
 
     /**
@@ -42,7 +40,7 @@ public class Tests extends BaseTests {
         testFindFirst();
     }
 
-//region Шаги 1.3
+//region Шаги
     @Step("Проверяем, есть ли Маркет на странице Яндекса и переходим на него")
     @ParameterizedTest(name="{displayName} {arguments}")
     @CsvSource({"Маркет"})
@@ -98,13 +96,23 @@ public class Tests extends BaseTests {
     @Step("Берем название первого товара на странице и ищем в поиске")
     private void testFindFirst() throws InterruptedException {
         YandexMarketCatalog yandexMarketCatalog = new YandexMarketCatalog(chromeDriver);
-        String firstProductName = yandexMarketCatalog.getNameProductById(0);
+        String firstProductName = yandexMarketCatalog.getNameProductByNumber(1);
         Assertions.assertTrue(yandexMarketCatalog.searchProduct(firstProductName),
                 "Товар с именем " + firstProductName + " не найден");
     }
-//endregion
-    //region Задание 1.4
 
+    @Step("Проверка всех результатов поиска")
+    private void testAllProducts(String productName) throws InterruptedException {
+        YandexMarketCatalog yandexMarketCatalog = new YandexMarketCatalog(chromeDriver);
+        Assertions.assertTrue(yandexMarketCatalog.checkAllProducts(productName),
+                "Среди результатов не был найден производитель " + productName);
+    }
+//endregion
+
+    /**
+     * Задание 1.4
+     * @throws InterruptedException
+     */
     @Feature("Проверка поиска смартфонов")
     @DisplayName("Проверка результатов поиска c помощью Page Object")
     @Test
@@ -112,20 +120,11 @@ public class Tests extends BaseTests {
         chromeDriver.get(yandexAddr);
         testMarketFromYandexMain("Маркет");
         testGoToCategory("Электроника", "Смартфоны", chromeDriver);
-        //testSetPrice("10000","30000");
         List<String> productMakers = new ArrayList<>();
         productMakers.add("Apple");
         testSetProductMaker(productMakers);
         testChangeCountProductsOnPage("12");
         testCountProductsOnPage(12);
-        testFindFirst();
+        testAllProducts("Apple");
     }
-
-
-    //endregion
-
-
-
-
-
 }

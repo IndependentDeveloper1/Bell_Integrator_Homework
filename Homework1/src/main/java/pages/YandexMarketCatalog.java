@@ -2,9 +2,7 @@ package pages;
 
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.*;
-import org.openqa.selenium.interactions.Action;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.interactions.Locatable;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -39,8 +37,10 @@ public class YandexMarketCatalog {
     private String selectorProducts = "//article[contains(@class, '_2vCnw cia-vs cia-cs') or contains(@class, 'LYpqx _61qCP _3LAO7 cia-vs cia-cs')]";
     // sel name product
     private String selectorProductName = ".//span[contains(@data-tid, 'ce80a508')]";
-    //Селектор ссылки
+    // Селектор ссылки
     private String selectorURL = ".//a[@href and @title]";
+    // Селектор следующей страницы
+    private String selectorNextPage = "//a[contains(@aria-label,'Следующая страница')]";
 
     /**
      * Устанавливаем диапозон цены
@@ -49,7 +49,6 @@ public class YandexMarketCatalog {
      * @return boolean поличилось ли выполнить действие
      */
     public boolean setPrice(String lowPrice, String highPrice){
-//        Assertions.assertTrue(goPage(pageName), "не удалось перейти на страницу " + pageName);
         try{
             WebElement priceFrom = driver.findElement(By.xpath(selectorPriceFrom));
             WebElement priceTo = driver.findElement(By.xpath(selectorPriceTo));
@@ -121,13 +120,23 @@ public class YandexMarketCatalog {
         }
     }
 
+    /**
+     * Проверяем число товаров на странице
+     * @param count Ожидаемое количество товаров
+     * @return результат операции
+     * @throws InterruptedException
+     */
     public boolean checkCountProducts(int count) throws InterruptedException {
         TimeUnit.SECONDS.sleep(4);
         List<WebElement> products = driver.findElements(By.xpath(selectorProducts));
-        System.out.println(products.size());
         return count == products.size();
     }
 
+    /**
+     * Получаем товары со страницы
+     * @return мапа с товарами
+     * @throws InterruptedException
+     */
     private List<Map<String, Object>> getProducts() throws InterruptedException {
         TimeUnit.SECONDS.sleep(3);
         List<WebElement> products = driver.findElements(By.xpath(selectorProducts));
@@ -145,12 +154,24 @@ public class YandexMarketCatalog {
         return productsMaps;
     }
 
-    public String getNameProductById(int id) throws InterruptedException {
+    /**
+     * Получаем товар со страницы в зависимости от его порядкового томера
+     * @param number Порядковый номер, начинаая с 1
+     * @return Название товара
+     * @throws InterruptedException
+     */
+    public String getNameProductByNumber(int number) throws InterruptedException {
+        number--;
         List<Map<String, Object>> productsMaps = getProducts();
-        System.out.println();
-        return productsMaps.get(id).get("NAME_PRODUCT").toString();
+        return productsMaps.get(number).get("NAME_PRODUCT").toString();
     }
 
+    /**
+     * Ищем товар в каталоге по имени
+     * @param productName Наименование товара
+     * @return Результат операции
+     * @throws InterruptedException
+     */
     public boolean searchProduct(String productName) throws InterruptedException {
         try{
             WebElement search = driver.findElement(By.id("header-search"));
@@ -171,8 +192,29 @@ public class YandexMarketCatalog {
         }
     }
 
-//    public boolean checkAllProducts(List<String> productMakers) throws InterruptedException {
-//        List<Map<String, Object>> products = getProducts();
-//
-//    }
+    /**
+     * Проверяем все товары на соответствие с необходимым производителем
+     * @param makerName Имя производителя товара
+     * @return Результат операции
+     * @throws InterruptedException
+     */
+    public boolean checkAllProducts(String makerName) throws InterruptedException {
+        List<Map<String, Object>> products = getProducts();
+        if(driver.findElement(By.xpath(selectorNextPage)).isEnabled()){
+            Actions action = new Actions(driver);
+            WebElement buttonNext = driver.findElement(By.xpath(selectorNextPage));
+            while(driver.findElement(By.xpath(selectorNextPage)).isEnabled()){
+                action.moveToElement(buttonNext).perform();
+                JavascriptExecutor executor = (JavascriptExecutor) driver;
+                executor.executeScript("arguments[0].click();", buttonNext);
+                TimeUnit.SECONDS.sleep(3);
+                products.addAll(getProducts());
+                try{buttonNext = driver.findElement(By.xpath(selectorNextPage));}
+                catch (WebDriverException e) {System.out.println("Последняя сраница пройдена"); break;}
+            }
+        }
+        boolean match = products.stream()
+                .allMatch(x -> x.get("NAME_PRODUCT").toString().contains(makerName));
+        return match;
+    }
 }
