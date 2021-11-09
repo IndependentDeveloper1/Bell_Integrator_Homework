@@ -1,6 +1,5 @@
 package pages;
 
-import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -9,7 +8,6 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 public class YandexMarketCatalog {
 
@@ -21,26 +19,19 @@ public class YandexMarketCatalog {
         wait = new WebDriverWait(driver, 15);
     }
 
-    // Селектор цена товара от
     private String selectorPriceFrom = "//input[@id='glpricefrom']";
-    // Селектор цена товара до
     private String selectorPriceTo = "//input[@id='glpriceto']";
-    // Селектор названия производителя товара
-    private String selectorMaker = "//div[contains(@class, '_1exhF')]/span[contains(text(), '";
-    // Селектор поиска по названию производителя товара
-    private String selectorSearchMaker = "//input[@class='_1JYTt']";
-    // sel button count
-    private String selectorButtonCountProductsOnPageOpen = "//button[contains(@class, 'vLDMf')]";
-    // sel button count on page
+    private String selectorMaker = "//div[contains(@data-zone-name, 'search-filter')]//span[contains(., '";
+    private String selectorSearchMaker = "//fieldset[contains(@data-autotest-id, '7893318')]//input[1]";
     private String selectorButtonCountProductsOnPage = "//button[contains(text(), 'Показывать по ";
-    // sel products
-    private String selectorProducts = "//article[contains(@class, '_2vCnw cia-vs cia-cs') or contains(@class, 'LYpqx _61qCP _3LAO7 cia-vs cia-cs')]";
-    // sel name product
-    private String selectorProductName = ".//span[contains(@data-tid, 'ce80a508')]";
-    // Селектор ссылки
+    private String selectorProducts = "//article[contains(@data-autotest-id, 'product-snippet')][not(.//div[contains(., 'Нет в продаже')])]";
     private String selectorURL = ".//a[@href and @title]";
-    // Селектор следующей страницы
     private String selectorNextPage = "//a[contains(@aria-label,'Следующая страница')]";
+    private String selectorLoading = "//div[contains(@role, 'main')]/div[2]";
+    private String selectorShowAllProductMakers = "//fieldset[contains(@data-autotest-id, '7893318')]//button";
+    private String selectorSearchButton = "//button[contains(@data-r, 'search-button')]";
+    private String selectorSearchField = "//input[contains(@id, 'header-search')]";
+    private String selectorShowOnPage = "//span[contains(text(),'Показывать по')]/../../..";
 
     /**
      * Устанавливаем диапозон цены
@@ -48,20 +39,14 @@ public class YandexMarketCatalog {
      * @param highPrice цена До
      * @return boolean поличилось ли выполнить действие
      */
-    public boolean setPrice(String lowPrice, String highPrice){
-        try{
+    public boolean setPrice(int lowPrice, int highPrice){
             WebElement priceFrom = driver.findElement(By.xpath(selectorPriceFrom));
             WebElement priceTo = driver.findElement(By.xpath(selectorPriceTo));
             priceFrom.click();
-            priceFrom.sendKeys(lowPrice);
+            priceFrom.sendKeys(String.valueOf(lowPrice));
             priceTo.click();
-            priceTo.sendKeys(highPrice);
+            priceTo.sendKeys(String.valueOf(highPrice));
             return true;
-        }
-        catch (WebDriverException e){
-            System.out.println("Ошибка: " + e);
-            return false;
-        }
     }
 
     /**
@@ -70,9 +55,7 @@ public class YandexMarketCatalog {
      * @return boolean получилось ли выполнить дейсвие
      */
     public boolean setProductMakers(List<String> productMakers){
-
-        try{
-            WebElement showAllMakersButton = driver.findElement(By.xpath("//button[@class='_1KpjX _2Wg9r']"));
+            WebElement showAllMakersButton = driver.findElement(By.xpath(selectorShowAllProductMakers));
             showAllMakersButton.click();
             for(String productMaker : productMakers){
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(selectorSearchMaker)));
@@ -84,14 +67,9 @@ public class YandexMarketCatalog {
                 searchMaker.sendKeys(productMaker);
                 wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(selectorMaker + productMaker + "')]")));
                 WebElement firstMakerCheckBox = driver.findElement(By.xpath(selectorMaker + productMaker + "')]"));
-               firstMakerCheckBox.click();
+                firstMakerCheckBox.click();
             }
             return true;
-        }
-        catch (WebDriverException e){
-            Assertions.fail(e);
-            return false;
-        }
     }
 
     /**
@@ -100,34 +78,28 @@ public class YandexMarketCatalog {
      * @return
      * @throws InterruptedException
      */
-    public boolean setCountProductsOnPage(String countProducts) throws InterruptedException {
-        try {
-            Actions action = new Actions(driver);
-            WebElement buttonOpen = driver.findElement(By.xpath(selectorButtonCountProductsOnPageOpen));
-            TimeUnit.SECONDS.sleep(2);
-            wait.until(ExpectedConditions.elementToBeClickable(buttonOpen));
-            action.moveToElement(driver.findElement(By.xpath("//div[contains(@class, '_3JNss _1BSH6 v3cFc')]"))).perform();
-            JavascriptExecutor executor = (JavascriptExecutor) driver;
-            executor.executeScript("arguments[0].click();", buttonOpen);
-            TimeUnit.SECONDS.sleep(3);
-            WebElement buttonChangeCount = driver.findElement(By.xpath(selectorButtonCountProductsOnPage + countProducts + "')]"));
-            action.moveToElement(buttonChangeCount).click().perform();
-            return true;
-        }
-        catch (WebDriverException e){
-            Assertions.fail(e);
-            return false;
-        }
+    public boolean setCountProductsOnPage(int countProducts) {
+        waitForInvisibility(3);
+        Actions action = new Actions(driver);
+        WebElement buttonOpen = driver.findElement(By.xpath(selectorShowOnPage));
+        wait.until(ExpectedConditions.elementToBeClickable(buttonOpen));
+        action.moveToElement(driver.findElement(By.xpath(selectorShowOnPage))).perform();
+        waitForInvisibility(3);
+        buttonOpen.click();
+        JavascriptExecutor executor = (JavascriptExecutor) driver;
+        executor.executeScript("arguments[0].click();", buttonOpen);
+        WebElement buttonChangeCount = driver.findElement(By.xpath(selectorButtonCountProductsOnPage + countProducts + "')]"));
+        executor.executeScript("arguments[0].click();", buttonChangeCount);
+        return true;
     }
 
     /**
      * Проверяем число товаров на странице
      * @param count Ожидаемое количество товаров
      * @return результат операции
-     * @throws InterruptedException
      */
-    public boolean checkCountProducts(int count) throws InterruptedException {
-        TimeUnit.SECONDS.sleep(4);
+    public boolean checkCountProducts(int count) {
+        waitForInvisibility(3);
         List<WebElement> products = driver.findElements(By.xpath(selectorProducts));
         return count == products.size();
     }
@@ -135,19 +107,14 @@ public class YandexMarketCatalog {
     /**
      * Получаем товары со страницы
      * @return мапа с товарами
-     * @throws InterruptedException
      */
-    private List<Map<String, Object>> getProducts() throws InterruptedException {
-        TimeUnit.SECONDS.sleep(3);
+    private List<Map<String, Object>> getProducts() {
         List<WebElement> products = driver.findElements(By.xpath(selectorProducts));
         List<Map<String, Object>> productsMaps = new ArrayList<>();
         for (WebElement product : products){
             productsMaps.add(Map.of(
-                    // Элемент категории
                     "WEB_ELEMENT", product,
-                    // Ссылка
                     "URL", product.findElement(By.xpath(selectorURL)).getAttribute("href"),
-                    // Название
                     "NAME_PRODUCT", product.findElement(By.xpath(selectorURL)).getAttribute("title")
             ));
         }
@@ -158,9 +125,8 @@ public class YandexMarketCatalog {
      * Получаем товар со страницы в зависимости от его порядкового томера
      * @param number Порядковый номер, начинаая с 1
      * @return Название товара
-     * @throws InterruptedException
      */
-    public String getNameProductByNumber(int number) throws InterruptedException {
+    public String getNameProductByNumber(int number) {
         number--;
         List<Map<String, Object>> productsMaps = getProducts();
         return productsMaps.get(number).get("NAME_PRODUCT").toString();
@@ -170,14 +136,12 @@ public class YandexMarketCatalog {
      * Ищем товар в каталоге по имени
      * @param productName Наименование товара
      * @return Результат операции
-     * @throws InterruptedException
      */
-    public boolean searchProduct(String productName) throws InterruptedException {
-        try{
-            WebElement search = driver.findElement(By.id("header-search"));
+    public boolean searchProduct(String productName) {
+            WebElement search = driver.findElement(By.xpath(selectorSearchField));
             search.click();
             search.sendKeys(productName);
-            WebElement searchButton = driver.findElement(By.xpath("//span[contains(@class, 'JqPid')]"));
+            WebElement searchButton = driver.findElement(By.xpath(selectorSearchButton));
             searchButton.click();
             List<Map<String, Object>> allProducts = getProducts();
             WebElement desiredProduct = (WebElement) allProducts.stream()
@@ -185,36 +149,67 @@ public class YandexMarketCatalog {
                     .findFirst()
                     .get().get("WEB_ELEMENT");
             return desiredProduct.isDisplayed();
-        }
-        catch (WebDriverException e){
-            Assertions.fail(e);
-            return false;
-        }
     }
 
     /**
-     * Проверяем все товары на соответствие с необходимым производителем
-     * @param makerName Имя производителя товара
+     * Проверяем все товары на соответствие с необходимыми производителями
+     * @param makers лист производителей товаров
      * @return Результат операции
-     * @throws InterruptedException
      */
-    public boolean checkAllProducts(String makerName) throws InterruptedException {
+    public boolean checkAllProducts(List<String> makers) {
         List<Map<String, Object>> products = getProducts();
         if(driver.findElement(By.xpath(selectorNextPage)).isEnabled()){
             Actions action = new Actions(driver);
             WebElement buttonNext = driver.findElement(By.xpath(selectorNextPage));
-            while(driver.findElement(By.xpath(selectorNextPage)).isEnabled()){
+            while(isElementPresent(By.xpath(selectorNextPage))){
                 action.moveToElement(buttonNext).perform();
                 JavascriptExecutor executor = (JavascriptExecutor) driver;
                 executor.executeScript("arguments[0].click();", buttonNext);
-                TimeUnit.SECONDS.sleep(3);
                 products.addAll(getProducts());
+                waitForInvisibility(3);
                 try{buttonNext = driver.findElement(By.xpath(selectorNextPage));}
-                catch (WebDriverException e) {System.out.println("Последняя сраница пройдена"); break;}
+                catch (WebDriverException e) {break;}
             }
         }
-        boolean match = products.stream()
-                .allMatch(x -> x.get("NAME_PRODUCT").toString().contains(makerName));
+        boolean match = false;
+        if (makers.size() == 1){
+            match = products.stream()
+                .allMatch(x -> x.get("NAME_PRODUCT").toString().contains(makers.get(0)));
+        }
+        else{
+            for (String maker : makers) {
+                match = products.stream().
+                        anyMatch(x -> x.get("NAME_PRODUCT").toString().contains(maker));
+            }
+        }
         return match;
+    }
+
+    /**
+     * Ожидание изчезновения подгрузки товаров
+     * @param maxSeconds максимальное время ожидания
+     */
+    public void waitForInvisibility(int maxSeconds) {
+        Long startTime = System.currentTimeMillis();
+        try {
+            WebElement webElement = driver.findElement(By.xpath(selectorLoading));
+            while (System.currentTimeMillis() - startTime < maxSeconds * 1000 && webElement.isDisplayed()) {}
+        } catch (WebDriverException e) {
+            return;
+        }
+    }
+
+    /**
+     * Проверка существует ли элемент на странице
+     * @param element By элемента
+     * @return да/нет
+     */
+    public boolean isElementPresent(By element) {
+        try {
+            driver.findElement(element);
+            return true;
+        } catch (NoSuchElementException e) {
+            return false;
+        }
     }
 }
