@@ -8,8 +8,7 @@ import org.openqa.selenium.support.PageFactory;
 public interface Page {
     public boolean isPageLoaded();
 
-    default void initPage() {
-        WebDriver driver = WebDriverManager.getCurrentDriver();
+    default void initPage(WebDriver driver) {
         try {
             PageFactory.initElements(driver, this);
             if (!isPageLoaded()) {

@@ -1,8 +1,7 @@
 package pages;
 
-import drivers.WebDriverManager;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
+import io.qameta.allure.Allure;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -11,8 +10,7 @@ import java.util.Map;
 
 public class BankAlfa implements Page, CurrencyExchangePage {
 
-    @FindBy(xpath = "//div[contains(@id, 'footer')]//a[contains(@href, '/currency/')]/..")
-    private WebElement exchangeRatesLink;
+    WebDriver driver;
 
     @FindBy(xpath = "//button[contains(@data-test-id, 'currency-EUR')]")
     private WebElement buyEURButton;
@@ -38,8 +36,9 @@ public class BankAlfa implements Page, CurrencyExchangePage {
 
     private Map<String, Double> currencies;
 
-    public BankAlfa(){
-        initPage();
+    public BankAlfa(WebDriver driver){
+        this.driver = driver;
+        initPage(driver);
         currencies = new HashMap<>();
     }
 
@@ -51,16 +50,12 @@ public class BankAlfa implements Page, CurrencyExchangePage {
         currencies.put("Евро.Покупка", convertToNormalDouble(euroBuy.getText().substring(0, 5)));
         buyUSDButton.click();
         currencies.put("Доллар.Покупка", convertToNormalDouble(dollarBuy.getText().substring(0, 5)));
+        Allure.addAttachment("Курсы банка", currencies.toString());
         return currencies;
     }
 
     @Override
-    public void preActions() {
-        WebElement body = WebDriverManager.getCurrentDriver().findElement(By.xpath("//body"));
-        body.click();
-        body.sendKeys(Keys.END);
-        exchangeRatesLink.click();
-    }
+    public void preActions() {}
 
     @Override
     public boolean isPageLoaded() {

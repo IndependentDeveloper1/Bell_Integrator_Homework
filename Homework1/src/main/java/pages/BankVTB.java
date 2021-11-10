@@ -1,5 +1,7 @@
 package pages;
 
+import io.qameta.allure.Allure;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 
@@ -8,8 +10,7 @@ import java.util.Map;
 
 public class BankVTB implements Page, CurrencyExchangePage {
 
-    @FindBy(xpath = "//div[contains(@class, 'card service-card')][.//div[contains(., 'Курсы валют')]]")
-    private WebElement exchangeRatesLink;
+    WebDriver driver;
 
     @FindBy(xpath = "(//li[contains(@class, 'simple-tab__heads-item')])[5]/a/span")
     private WebElement cardBuyExchanges;
@@ -32,8 +33,9 @@ public class BankVTB implements Page, CurrencyExchangePage {
 
     private Map<String, Double> currencies;
 
-    public BankVTB(){
-        initPage();
+    public BankVTB(WebDriver driver){
+        this.driver = driver;
+        initPage(driver);
         currencies = new HashMap<>();
     }
 
@@ -48,12 +50,12 @@ public class BankVTB implements Page, CurrencyExchangePage {
         currencies.put("Доллар.Продажа", convertToNormalDouble(dollarSell.getText()));
         currencies.put("Евро.Покупка", convertToNormalDouble(euroBuy.getText()));
         currencies.put("Евро.Продажа", convertToNormalDouble(euroSell.getText()));
+        Allure.addAttachment("Курсы банка", currencies.toString());
         return currencies;
     }
 
     @Override
     public void preActions() {
-        exchangeRatesLink.click();
         cardBuyExchanges.click();
     }
 }

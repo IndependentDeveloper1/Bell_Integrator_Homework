@@ -31,7 +31,7 @@ public class GooglePageWithSearchPOFactory implements Page {
     private List<Map<String,Object>> collectedResults = new ArrayList<>();
 
     public GooglePageWithSearchPOFactory() {
-        initPage();
+        initPage(driver);
         this.driver = WebDriverManager.getCurrentDriver();
     }
 

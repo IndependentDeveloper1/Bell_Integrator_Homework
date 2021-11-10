@@ -1,7 +1,6 @@
 package testsBanks;
 
 import Steps.*;
-import drivers.WebDriverManager;
 import io.qameta.allure.Feature;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -16,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class Tests{
+public class Tests extends BaseTests{
 
     /**
      * Тест с кейсом проверки курсов обмена валют в банках
@@ -27,33 +26,27 @@ public class Tests{
     @ParameterizedTest
     @MethodSource("banksRates")
     public void testCurrencyRates(double rateDollar){
-        WebDriverManager.initChrome();
         Map<String, Map<String, Double>> currencyRatesBanks = new HashMap<>();
 
-        WebDriverManager.getCurrentDriver().get("https://www.open.ru/");
-        BankOpen bankOpen = new BankOpen();
+        chromeDriver.get("https://www.open.ru/");
+        BankOpen bankOpen = new BankOpen(chromeDriver);
         currencyRatesBanks.put("Открытие", StepsBanks.getBankCurrency(bankOpen, "Открытие"));
 
-        WebDriverManager.getCurrentDriver().get("https://www.vtb.ru/");
-        BankVTB bankVTB = new BankVTB();
+        chromeDriver.get("https://www.vtb.ru/personal/platezhi-i-perevody/obmen-valjuty/");
+        BankVTB bankVTB = new BankVTB(chromeDriver);
         currencyRatesBanks.put("ВТБ", StepsBanks.getBankCurrency(bankVTB, "ВТБ"));
 
-        WebDriverManager.getCurrentDriver().get("https://alfabank.ru/");
-        BankAlfa bankAlfa = new BankAlfa();
+        chromeDriver.get("https://alfabank.ru/currency/");
+        BankAlfa bankAlfa = new BankAlfa(chromeDriver);
         currencyRatesBanks.put("Альфа", StepsBanks.getBankCurrency(bankAlfa, "Альфа"));
 
-        WebDriverManager.getCurrentDriver().get("https://www.sberbank.ru/");
-        BankSberbank bankSberbank = new BankSberbank();
+        chromeDriver.get("https://www.sberbank.ru/ru/quotes/currencies");
+        BankSberbank bankSberbank = new BankSberbank(chromeDriver);
         currencyRatesBanks.put("Сбербанк", StepsBanks.getBankCurrency(bankSberbank, "Сбербанк"));
 
-        System.out.println("Разница лучшего у худшего курсов не более 1 у.е.: " + StepsBanks.isDifferentBig(currencyRatesBanks));
-        System.out.println("Продажа доллара банков не превышает " + rateDollar + ": " + StepsBanks.isDollarHigh(rateDollar, currencyRatesBanks));
+        StepsBanks.isDifferentBig(currencyRatesBanks);
+        StepsBanks.isDollarHigh(rateDollar, currencyRatesBanks);
 
-        System.out.println("\nИнформация по банкам:\n");
-        for(Map.Entry<String, Map<String, Double>> pair : currencyRatesBanks.entrySet()){
-            System.out.println(pair.getKey() + " " + pair.getValue());
-        }
-        WebDriverManager.killCurrentDriver();
     }
 
     /**
